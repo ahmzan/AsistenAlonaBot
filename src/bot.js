@@ -214,15 +214,27 @@ bot.on('channel_post', (ctx) => {
   }
 });
 
-bot.on('text', (ctx) => {
+bot.on('text', async (ctx) => {
   if (ctx.chat.type == 'private') {
+    let data;
     if (ctx.session?.action == 'editTag') {
-      let data = JSON.parse(
-        readFileSync(`data/${ctx.session.group_id}.json`, 'utf-8')
-      );
+      if (!existsSync(`data/${ctx.session}.json`)) {
+        data = await db
+          .query({
+            text: 'SELECT * FROM groups_forward WHERE group_id = $1',
+            values: [ctx.session.group_id],
+          })
+          .then((res) => {
+            if (res.rowCount > 0) {
+              return res.rows[0].data;
+            }
+          });
+      } else {
+        data = JSON.parse(
+          readFileSync(`data/${ctx.session.group_id}.json`, 'utf-8')
+        );
+      }
       let trigger = ctx.message.text.match(/#[a-zA-Z0-9]*/g);
-      // console.log(trigger);
-      // return;
       trigger = '(' + trigger.join('|') + ')';
       return db
         .query({
