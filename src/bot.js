@@ -43,16 +43,20 @@ bot.start((ctx) => {
       });
     }
   });
+  let inkey = [];
+  inkey.push([
+    {
+      text: 'Tambahkan ke group',
+      url: `https://t.me/${ctx.botInfo.username}?startgroup=add`,
+    },
+  ]);
+  if (process.env.CUSTOM_INKEY) {
+    inkey = inkey.concat(JSON.parse(process.env.CUSTOM_INKEY));
+    // console.log(JSON.parse(process.env.CUSTOM_INKEY));
+  }
   return ctx.replyWithHTML(msg, {
     reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: 'Tambahkan ke group',
-            url: `https://t.me/${ctx.botInfo.username}?startgroup=add`,
-          },
-        ],
-      ],
+      inline_keyboard: inkey,
     },
   });
 });
