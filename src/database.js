@@ -5,10 +5,11 @@ class database {
     console.log('DB : Connecting');
     this.config = config;
     this.client = new Client({ ssl: { rejectUnauthorized: false }, ...config });
-    this.client.connect();
+    this.connect();
   }
 
   connect() {
+    console.log('DB : Connecting');
     return this.client.connect();
   }
 
