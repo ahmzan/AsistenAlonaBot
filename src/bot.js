@@ -149,7 +149,7 @@ bot.on('new_chat_members', (ctx) => {
           values: [user_added.id],
         })
         .then((res) => {
-          if (res.rowCount >= 0 && !res.rows[0].blocked) {
+          if (res.rowCount > 0) {
             ctx.reply(
               'Terima kasih, kode verifikasi telah di kirim melalui private message'
             );
