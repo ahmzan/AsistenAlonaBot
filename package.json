@@ -4,8 +4,8 @@
   "description": "Sebuah bot yang membantu anda",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js -p $PORT",
-    "test": "node index.js -e .env"
+    "start": "node src/index.js -p $PORT",
+    "test": "node src/index.js -e .env"
   },
   "keywords": [
     "Bot",
@@ -13,5 +13,9 @@
     "Asisten"
   ],
   "author": "Ahmzan <ahmzan.dev@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "telegraf": "^4.2.1"
+  }
 }
