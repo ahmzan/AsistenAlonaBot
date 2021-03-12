@@ -49,7 +49,7 @@ bot.start((ctx) => {
         [
           {
             text: 'Tambahkan ke group',
-            url: 'https://t.me/asistenalonabot?startgroup=add',
+            url: `https://t.me/${ctx.botInfo.username}?startgroup=add`,
           },
         ],
       ],
@@ -90,6 +90,26 @@ bot.command('settag', (ctx) => {
     }
   }
 });
+
+bot.command('code', (ctx) => {
+  console.log('Command /code');
+  if (ctx.chat.type == 'private') {
+    return;
+  } else if (ctx.chat.type == 'group' || ctx.chat.type == 'supergroup') {
+    let code = Math.floor(Math.random() * (999999 - 100000 + 1) + 100000);
+    writeFileAndDir(
+      `tmp/verif/${code}`,
+      JSON.stringify({
+        code: code,
+        userid: ctx.from.id,
+        groupid: ctx.chat.id,
+        groupname: ctx.chat.title,
+      })
+    );
+    return ctx.replyWithHTML(`Berikut kode anda <code>${code}</code>`);
+  }
+});
+
 bot.on('callback_query', (ctx) => {
   let query = ctx.callbackQuery;
   if (/editTag/.test(query.data)) {
