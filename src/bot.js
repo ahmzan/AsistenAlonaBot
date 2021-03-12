@@ -6,7 +6,7 @@ const database = require('./database');
 const bot = new Composer();
 const db = new database({ connectionString: process.env.DATABASE_URL });
 
-// bot.use(session());
+bot.use(session());
 // bot.use(Telegraf.log());
 
 bot.use(async (ctx, next) => {
@@ -57,6 +57,45 @@ bot.help((ctx) => {
   console.log('Command /help');
   let msg = readFileSync(resolve('text/help'), 'utf8');
   return ctx.replyWithHTML(msg);
+});
+
+bot.command('settag', (ctx) => {
+  let user = ctx.from;
+  let inkey = [];
+  if (!ctx.session) {
+    db.query({
+      text: 'SELECT * FROM groups WHERE added_by = $1',
+      values: [user.id],
+    }).then((res) => {
+      if (res.rowCount == 0) {
+        inkey = [{ text: 'Tidak ada' }];
+      } else {
+        res.rows.forEach((row) => {
+          inkey.push([
+            { text: row.group_title, callback_data: `editTag_${row.group_id}` },
+          ]);
+        });
+      }
+      return ctx.reply('Berikut Group yang anda kelola', {
+        reply_markup: { inline_keyboard: inkey },
+      });
+    });
+  } else {
+    if (ctx.session.action == 'editTag') {
+      return ctx.reply('Silahkan kirimkan tag pemicu');
+    }
+  }
+});
+bot.on('callback_query', (ctx) => {
+  let query = ctx.callbackQuery;
+  if (/editTag/.test(query.data)) {
+    let [cmd, group_id] = query.data.split('_');
+    ctx.session = { action: cmd, group_id };
+    return ctx.editMessageText(
+      'Oke silahkan tulis pemicu tag, pemicu tag dapat lebih dari satu pisahkan dengan spasi\nContoh #post #ch'
+    );
+  }
+  ctx.answerCbQuery();
 });
 
 bot.on('new_chat_members', (ctx) => {
@@ -176,20 +215,63 @@ bot.on('channel_post', (ctx) => {
 });
 
 bot.on('text', (ctx) => {
-  let group = ctx.chat;
-  let msg = ctx.message;
-  if (!existsSync(`data/${group.id}.json`)) {
-    db.query({
-      text: 'SELECT * FROM groups_forward WHERE group_id = $1',
-      values: [group.id],
-    }).then((res) => {
-      if (res.rowCount > 0) {
-        writeFileAndDir(
-          `data/${group.id}.json`,
-          JSON.stringify(res.rows[0].data)
-        );
-      }
-      var data = res.rows[0].data;
+  if (ctx.chat.type == 'private') {
+    if (ctx.session?.action == 'editTag') {
+      let data = JSON.parse(
+        readFileSync(`data/${ctx.session.group_id}.json`, 'utf-8')
+      );
+      let trigger = ctx.message.text.match(/#[a-zA-Z0-9]*/g);
+      // console.log(trigger);
+      // return;
+      trigger = '(' + trigger.join('|') + ')';
+      return db
+        .query({
+          text: 'UPDATE groups_forward SET data = $1 WHERE group_id = $2',
+          values: [JSON.stringify({ ...data, trigger }), ctx.session.group_id],
+        })
+        .catch((e) => {
+          console.error(e.message);
+          return ctx.reply(
+            'Terjadi kesalahan saat mengupdate tag\nCoba lagi beberapa saat'
+          );
+        })
+        .then((_) => {
+          writeFileAndDir(
+            `data/${ctx.session.group_id}.json`,
+            JSON.stringify({
+              ...data,
+              trigger,
+            })
+          );
+          ctx.reply('Pemicu tag berhasil dirubah');
+          ctx.session = null;
+        });
+    }
+  } else if (ctx.chat.type == 'supergroup' || ctx.chat.type == 'group') {
+    let group = ctx.chat;
+    let msg = ctx.message;
+    if (!existsSync(`data/${group.id}.json`)) {
+      db.query({
+        text: 'SELECT * FROM groups_forward WHERE group_id = $1',
+        values: [group.id],
+      }).then((res) => {
+        if (res.rowCount > 0) {
+          writeFileAndDir(
+            `data/${group.id}.json`,
+            JSON.stringify(res.rows[0].data)
+          );
+        }
+        var data = res.rows[0].data;
+        if (new RegExp(data.trigger, 'g').test(msg.text)) {
+          return ctx.telegram
+            .forwardMessage(data.channelid, group.id, msg.message_id)
+            .then((f_msg) => {
+              ctx.deleteMessage(msg.message_id);
+            });
+        }
+      });
+    } else {
+      var data = JSON.parse(readFileSync(`data/${group.id}.json`, 'utf-8'));
       if (new RegExp(data.trigger, 'g').test(msg.text)) {
         return ctx.telegram
           .forwardMessage(data.channelid, group.id, msg.message_id)
@@ -197,15 +279,6 @@ bot.on('text', (ctx) => {
             ctx.deleteMessage(msg.message_id);
           });
       }
-    });
-  } else {
-    var data = JSON.parse(readFileSync(`data/${group.id}.json`, 'utf-8'));
-    if (new RegExp(data.trigger, 'g').test(msg.text)) {
-      return ctx.telegram
-        .forwardMessage(data.channelid, group.id, msg.message_id)
-        .then((f_msg) => {
-          ctx.deleteMessage(msg.message_id);
-        });
     }
   }
 });

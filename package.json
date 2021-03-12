@@ -1,6 +1,6 @@
 {
   "name": "asistenalonabot",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Sebuah bot yang membantu anda",
   "main": "index.js",
   "scripts": {
