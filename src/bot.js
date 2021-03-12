@@ -18,9 +18,13 @@ bot.use(async (ctx, next) => {
 bot.start((ctx) => {
   console.log('Command /start');
   let user = ctx.from;
-  let params = ctx.message.text.split(' ');
-  if (params[1] == 'add') {
-    return;
+  if (ctx.chat.type != 'private') {
+    let params = ctx.message.text.split(' ');
+    if (params[1] == 'add') {
+      return;
+    } else {
+      return ctx.reply('ada yang bisa dibantu');
+    }
   }
   let msg = readFileSync(resolve('text/start'), 'utf8');
   msg = msg.replace(
@@ -126,8 +130,13 @@ bot.on('new_chat_members', (ctx) => {
           if (res.rowCount == 0) {
             db.query({
               text:
-                'INSERT INTO groups(group_id, group_title, first_added) VALUES($1, $2, $3)',
-              values: [group.id, group.title, new Date().getTime()],
+                'INSERT INTO groups(group_id, group_title, first_added, added_by) VALUES($1, $2, $3, $4)',
+              values: [
+                group.id,
+                group.title,
+                new Date().getTime(),
+                user_added.id,
+              ],
             });
           }
         })
