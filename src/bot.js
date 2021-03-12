@@ -281,14 +281,16 @@ bot.on('text', async (ctx) => {
             `data/${group.id}.json`,
             JSON.stringify(res.rows[0].data)
           );
-        }
-        var data = res.rows[0].data;
-        if (new RegExp(data.trigger, 'g').test(msg.text)) {
-          return ctx.telegram
-            .forwardMessage(data.channelid, group.id, msg.message_id)
-            .then((f_msg) => {
-              ctx.deleteMessage(msg.message_id);
-            });
+          var data = res.rows[0].data;
+          if (new RegExp(data.trigger, 'g').test(msg.text)) {
+            return ctx.telegram
+              .forwardMessage(data.channelid, group.id, msg.message_id)
+              .then((f_msg) => {
+                ctx.deleteMessage(msg.message_id);
+              });
+          }
+        } else {
+          return;
         }
       });
     } else {
