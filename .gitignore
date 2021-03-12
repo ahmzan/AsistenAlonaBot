@@ -1,0 +1,5 @@
+# igore files
+.env
+
+# igore folder
+node_modules
