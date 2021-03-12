@@ -1,0 +1,21 @@
+{
+  "name": "asistenalonabot",
+  "version": "0.0.0",
+  "description": "Sebuah bot yang membantu anda",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js -p $PORT",
+    "test": "node src/index.js -e .env"
+  },
+  "keywords": [
+    "Bot",
+    "Telegram",
+    "Asisten"
+  ],
+  "author": "Ahmzan <ahmzan.dev@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "telegraf": "^4.2.1"
+  }
+}
