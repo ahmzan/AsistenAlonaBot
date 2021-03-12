@@ -1,0 +1,10 @@
+<b>Berikut adalah tahap-tahap untuk menghubungkan group dan channel anda</b>
+1. Masukan bot ke group dan channel anda, pastikan ditambahkan sebagai admin,
+2. Bot akan mengirimkan kode verifikasi melalui private message
+3. Masukan kode tersebut pada channel anda, dan pastikan bot berada disitu,
+4. Bila proses berhasil anda akan melihat pesan sukses setelah proses ini selesai
+5. Dan selamat channel dan group anda sudah terhubung, selanjutnya anda dapat mengatur tag meggunakan /settag
+6. Kode akan terhapus otomatis pada channel anda setelah keduanya terhubung
+
+<b>Untuk apa <code>/settag</code> ❓</b>
+settag berfungsi untuk mengatur pemicu agar pesan di group dapat diteruskan ke channel anda

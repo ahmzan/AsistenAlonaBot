@@ -3,3 +3,5 @@
 
 # igore folder
 node_modules
+data/*
+tmp/*

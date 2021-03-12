@@ -1,0 +1,10 @@
+Horay, ✨
+Group <b>{groupname}</b>
+sekarang terhubung dengan
+Channel <b>{channelname}</b>
+
+pemicu default saat ini adalah #post
+untuk mengubah pemicu anda dapat menggunakan /settag
+
+pemicu dapat lebih dari satu contoh
+/settag #post #channel
