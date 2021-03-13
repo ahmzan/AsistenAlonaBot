@@ -247,7 +247,7 @@ bot.on('channel_post', (ctx) => {
   }
 });
 
-bot.on('text', async (ctx) => {
+bot.on(['text', 'edited_message', 'photo'], async (ctx) => {
   if (ctx.chat.type == 'private') {
     let data;
     if (ctx.session?.action == 'editTag') {
@@ -294,7 +294,7 @@ bot.on('text', async (ctx) => {
     }
   } else if (ctx.chat.type == 'supergroup' || ctx.chat.type == 'group') {
     let group = ctx.chat;
-    let msg = ctx.message;
+    let msg = ctx.message ? ctx.message : ctx.editedMessage;
     if (!existsSync(`data/${group.id}.json`)) {
       db.query({
         text: 'SELECT * FROM groups_forward WHERE group_id = $1',
@@ -319,7 +319,8 @@ bot.on('text', async (ctx) => {
       });
     } else {
       var data = JSON.parse(readFileSync(`data/${group.id}.json`, 'utf-8'));
-      if (new RegExp(data.trigger, 'g').test(msg.text)) {
+      let text = msg.text ? msg.text : msg.caption;
+      if (new RegExp(data.trigger, 'g').test(text)) {
         return ctx.telegram
           .forwardMessage(data.channelid, group.id, msg.message_id)
           .then((f_msg) => {
